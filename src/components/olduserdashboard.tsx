@@ -1,7 +1,11 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 
 export default function LibraryPage() {
+  const [activeTab, setActiveTab] = useState<"Library" | "Customisation">(
+    "Library"
+  );
+
   const files = [
     { name: "name-pdf.pdf" },
     { name: "https://z-lib/emily-br..." },
@@ -21,10 +25,24 @@ export default function LibraryPage() {
 
       
       <div className="flex justify-center mt-4 space-x-2">
-        <button className="bg-blue-500 text-white px-6 py-2 rounded">
+        <button
+          onClick={() => setActiveTab("Library")}
+          className={`px-6 py-2 rounded ${
+            activeTab === "Library"
+              ? "bg-blue-500 text-white"
+              : "bg-black text-white"
+          }`}
+        >
           Library
         </button>
-        <button className="bg-black text-white px-6 py-2 rounded">
+        <button
+          onClick={() => setActiveTab("Customisation")}
+          className={`px-6 py-2 rounded ${
+            activeTab === "Customisation"
+              ? "bg-blue-500 text-white"
+              : "bg-black text-white"
+          }`}
+        >
           Customisation
         </button>
       </div>
@@ -54,18 +72,41 @@ export default function LibraryPage() {
                 <p className="truncate w-full text-sm mb-2 text-center">
                   {file.name}
                 </p>
-                <div className="flex justify-center space-x-2">
-                  <button className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
-                    listen
-                  </button>
-                  <button className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
-                    delete
+
+                {/* Divider */}
+                <div className="flex items-center justify-center gap-2 mb-4">
+                  <div className="flex-1 h-px bg-gray-600" />
+                  <span className="text-gray-400 text-sm">or</span>
+                  <div className="flex-1 h-px bg-gray-600" />
+                </div>
+
+                {/* Upload Section */}
+                <div className="flex items-center gap-4">
+                  <span className="text-sm text-gray-400">
+                    upload your recording here : <br />
+                    <span className="text-gray-500">supported formats: mp3</span>
+                  </span>
+                  <button className="bg-blue-600 px-4 py-2 rounded text-sm">
+                    voice recording
                   </button>
                 </div>
-              </div>
-            ))}
+              </section>
+
+              {/* Right Section */}
+              <section className="bg-gradient-to-b from-gray-800 to-black rounded-xl p-8 w-80 text-center shadow-lg">
+                <p className="text-gray-400 mb-6">
+                  press the button below to start recording
+                </p>
+                <div className="flex flex-col items-center">
+                  {/* Mic button */}
+                  <button className="bg-white text-black p-4 rounded-full hover:scale-105 transition">
+                    🎤
+                  </button>
+                </div>
+              </section>
+            </main>
           </div>
-        </div>
+        )}
       </main>
     </div>
   );
