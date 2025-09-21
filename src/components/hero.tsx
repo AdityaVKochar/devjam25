@@ -46,9 +46,6 @@ export default function Hero(): React.ReactElement {
 				}}
 			>
 				<div style={{color: 'white', fontWeight: 600, fontSize: 18}}>brandname</div>
-				<div>
-					<Link href="/signin" style={{background: 'rgba(255,255,255,0.12)', color: 'white', padding: '8px 14px', borderRadius: 18, textDecoration: 'none', display: 'inline-block'}}>sign in</Link>
-				</div>
 			</nav>
 
 			{/* Center content */}
