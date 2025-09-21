@@ -1,3 +1,5 @@
+'use server'
+
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../options";
 import clientPromise from "../../../../lib/mongodb";
