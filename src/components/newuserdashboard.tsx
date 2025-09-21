@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { signOut } from "next-auth/react";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("Library");
@@ -28,7 +29,7 @@ export default function Home() {
         </div>
 
         {/* Sign Out */}
-        <button className="px-4 py-1 rounded-md bg-gray-800 text-sm text-gray-200 hover:bg-gray-700">
+        <button onClick={() => signOut({ callbackUrl: "/signin" })} className="px-4 py-1 rounded-md bg-gray-800 text-sm text-gray-200 hover:bg-gray-700">
           sign out
         </button>
       </div>

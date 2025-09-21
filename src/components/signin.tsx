@@ -2,6 +2,7 @@
 import React from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { signIn } from "next-auth/react";
 
 const Threads = dynamic(() => import("./Threads").then((m) => m.default), {
   ssr: false,
@@ -30,8 +31,8 @@ export default function SignIn(): React.ReactElement {
             orci, eu porttitor lacus.
           </p>
 
-          <Link href="/dashboard">
-            <button className="mt-7 flex w-full items-center justify-center gap-3 rounded-full bg-white px-5 py-3 font-semibold text-black shadow-md transition hover:bg-gray-100">
+          <div>
+            <button onClick={() => signIn('google', { callbackUrl: '/api/auth/after' })} className="mt-7 flex w-full items-center justify-center gap-3 rounded-full bg-white px-5 py-3 font-semibold text-black shadow-md transition hover:bg-gray-100">
               <img
                 src="/google.svg"
                 alt="Google"
@@ -39,7 +40,7 @@ export default function SignIn(): React.ReactElement {
               />
               <span>Sign in with Google</span>
             </button>
-          </Link>
+          </div>
         </div>
       </div>
     </section>
