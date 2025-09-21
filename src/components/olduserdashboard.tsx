@@ -1,6 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { signOut } from "next-auth/react";
+import Popup from "./Popup";
+import Image from "next/image";
 
 export default function OldUserDashboard() {
   const [activeTab, setActiveTab] = useState("library");
@@ -12,11 +14,18 @@ export default function OldUserDashboard() {
     { name: "no-name.txt" },
   ];
 
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+  const handleSubmit = (link: string) => {
+    console.log("submitted link:", link);
+    setIsPopupOpen(false);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-700 to-black text-white">
       {/* Header */}
       <header className="flex justify-between items-center px-6 py-4">
-        <h1 className="text-sm font-semibold">brandname</h1>
+        <h1 className="text-sm font-semibold">EchoTales</h1>
         <button
           onClick={() => signOut({ callbackUrl: "/signin" })}
           className="bg-black text-white rounded px-4 py-1 hover:opacity-90"
@@ -47,16 +56,23 @@ export default function OldUserDashboard() {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center px-6 pt-6 mb-6">
-        <div className="bg-gray-900 p-6 rounded-xl w-full max-w-6xl flex-1 flex flex-col">
+        <div
+  className="p-6 rounded-xl w-full max-w-6xl flex-1 flex flex-col text-white"
+  style={{
+    background: "rgba(0, 0, 0, 0.45)",
+    boxShadow: "0 4px 4px 0 rgba(0, 0, 0, 0.25)",
+    backdropFilter: "blur(2px)",
+  }}
+>
+
           {activeTab === "library" ? (
             
             <div className="flex flex-col flex-1">
-              <h2 className="text-xl font-semibold mb-4 text-center">Your Library</h2>
-              <div className="flex items-center space-x-2 mb-15">
+              <div className="flex items-center space-x-2 mb-15 mt-10">
                 <input
                   type="text"
                   placeholder="search"
-                  className="flex-1 bg-gray-200 text-black rounded px-3 py-2"
+                  className="flex-1 bg-[#C7D0E9] text-black rounded px-3 py-2"
                 />
                 <button
                   type="button"
@@ -66,6 +82,7 @@ export default function OldUserDashboard() {
                     boxShadow: "4px 4px 1px 0 #B1C2F4",
                   }}
                   className="px-6 py-2 text-white font-bold transition-colors border-2 border-blue-700 ml-4"
+                  onClick={() => setIsPopupOpen(true)}
                 >
                   upload here
                 </button>
@@ -75,12 +92,12 @@ export default function OldUserDashboard() {
                 {files.map((file, index) => (
                   <div
                     key={index}
-                    className="bg-gray-200 text-black rounded p-4 flex flex-col justify-between h-28"
+                    className="bg-[#C7D0E9] text-black rounded p-4 flex flex-col justify-between h-38"
                   >
                     <p className="truncate w-full text-sm mb-2 text-center">
                       {file.name}
                     </p>
-                    <div className="flex justify-center space-x-4">
+					<div className="flex justify-center space-x-6">
                       <button
                         type="button"
                         style={{
@@ -105,22 +122,22 @@ export default function OldUserDashboard() {
                       </button>
                     </div>
                   </div>
+				  
                 ))}
               </div>
             </div>
           ) : (
             
             <div className="flex-1 flex items-center justify-center text-white overflow-hidden">
-              <main className="flex flex-col md:flex-row items-center justify-center gap-10 w-full">
+              <main className="flex flex-col md:flex-row items-center justify-center gap-30 w-full">
                 {/* Left Section */}
                 <section className="max-w-md">
                   <h2 className="text-2xl font-semibold mb-4">
                     Customise stories with your voice
                   </h2>
                   <p className="text-gray-300 mb-6 leading-relaxed">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi
-                    lobortis maximus nunc, ac rhoncus odio congue quis. Sed ac semper
-                    orci, eu porttitor lacus....
+                    Customise how your stories sound. Make every story uniquely yours. Record your own voice or upload a file to bring characters and narration to life in a way that feels personal. Your voice, your story.
+Record now. 
                   </p>
 
                   {/* Divider */}
@@ -151,13 +168,17 @@ export default function OldUserDashboard() {
                 </section>
 
                 {/* Right Section */}
-                <section className="bg-gradient-to-b from-gray-800 to-black rounded-xl p-8 w-80 text-center shadow-lg">
+                <section
+  className="bg-[url('/dotbg.svg')] bg-cover border-1 bg-center rounded-xl p-8 w-80 text-center shadow-lg"
+>
                   <p className="text-gray-400 mb-6">
                     press the button below to start recording
                   </p>
+				                        
                   <div className="flex flex-col items-center">
-                    <button className="bg-white text-black p-4 rounded-full hover:scale-105 transition">
-                      🎤
+					<Image src="/wave.svg" alt="mic" width={200} height={200} />
+                    <button className="hover:scale-105 transition mt-6">
+                      <Image src="/mic.svg" alt="mic" width={60} height={60} />
                     </button>
                   </div>
                 </section>
@@ -166,6 +187,7 @@ export default function OldUserDashboard() {
           )}
         </div>
       </main>
+      <Popup isOpen={isPopupOpen} onCancel={() => setIsPopupOpen(false)} onSubmit={handleSubmit} />
     </div>
   );
 }

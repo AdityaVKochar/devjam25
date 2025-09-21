@@ -12,7 +12,7 @@ const Popup: React.FC<PopupProps> = ({ isOpen, onCancel, onSubmit }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-80 backdrop-blur-lg transition-all">
       <div
         style={{
           borderRadius: "7px",
