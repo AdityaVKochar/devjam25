@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
+
 import { Geist, Geist_Mono } from "next/font/google";
+import "@fontsource/metropolis/400.css";
+import "@fontsource/metropolis/500.css";
+import "@fontsource/metropolis/700.css";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -26,6 +30,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        style={{ fontFamily: 'Metropolis, Arial, Helvetica, sans-serif' }}
       >
         {children}
       </body>
