@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FaUserCircle } from "react-icons/fa";
@@ -19,6 +19,10 @@ export default function EchoTalesPage({ fileTitle, onBack }: MainProps) {
   const [lines, setLines] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [audioLoading, setAudioLoading] = useState(false);
+  const [audioError, setAudioError] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioUrlRef = useRef<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -41,6 +45,92 @@ export default function EchoTalesPage({ fileTitle, onBack }: MainProps) {
       }
     };
     fetchLines();
+  }, [fileTitle]);
+
+  // Fetch generated audio from the listen API when fileTitle is available
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchAudio = async () => {
+      if (!fileTitle) return;
+      setAudioLoading(true);
+      setAudioError(null);
+
+      // cleanup any previous audio
+      if (audioRef.current) {
+        try {
+          audioRef.current.pause();
+        } catch (e) {}
+        audioRef.current = null;
+      }
+      if (audioUrlRef.current) {
+        URL.revokeObjectURL(audioUrlRef.current);
+        audioUrlRef.current = null;
+      }
+
+      try {
+        const res = await fetch(`/api/listen/${encodeURIComponent(fileTitle)}`);
+        if (!res.ok) {
+          const txt = await res.text().catch(() => "");
+          setAudioError(`Voice service error: ${txt || res.status}`);
+          setAudioLoading(false);
+          return;
+        }
+
+        const blob = await res.blob();
+        if (cancelled) return;
+
+        const url = URL.createObjectURL(blob);
+        audioUrlRef.current = url;
+        const audio = new Audio(url);
+        audioRef.current = audio;
+
+        const handleEnded = () => setIsPlaying(false);
+        audio.addEventListener('ended', handleEnded);
+
+        // Try to autoplay; browsers may block autoplay without user gesture.
+        try {
+          await audio.play();
+          setIsPlaying(true);
+        } catch (playErr) {
+          // Autoplay blocked; keep audio paused but available to play on user action
+          setIsPlaying(false);
+        }
+
+        // cleanup listener when audio changes
+        const cleanup = () => {
+          audio.removeEventListener('ended', handleEnded);
+        };
+
+        // Attach cleanup to ref so it can be called on next fetch or unmount
+        (audioRef as any).currentCleanup = cleanup;
+
+      } catch (err) {
+        setAudioError('Failed to fetch audio');
+      } finally {
+        setAudioLoading(false);
+      }
+    };
+
+    fetchAudio();
+
+    return () => {
+      cancelled = true;
+      // remove audio and cleanup
+      if (audioRef.current) {
+        try {
+          // remove possible custom cleanup
+          const c = (audioRef as any).currentCleanup;
+          if (typeof c === 'function') c();
+          audioRef.current.pause();
+        } catch (e) {}
+        audioRef.current = null;
+      }
+      if (audioUrlRef.current) {
+        URL.revokeObjectURL(audioUrlRef.current);
+        audioUrlRef.current = null;
+      }
+    };
   }, [fileTitle]);
 
   return (
@@ -139,7 +229,20 @@ export default function EchoTalesPage({ fileTitle, onBack }: MainProps) {
             <MdSkipPrevious size={28} />
           </button>
           <button
-            onClick={() => setIsPlaying(!isPlaying)}
+            onClick={async () => {
+              if (!audioRef.current) return;
+              try {
+                if (isPlaying) {
+                  audioRef.current.pause();
+                  setIsPlaying(false);
+                } else {
+                  await audioRef.current.play();
+                  setIsPlaying(true);
+                }
+              } catch (e) {
+                // ignore play errors
+              }
+            }}
             className="bg-blue-500 hover:bg-blue-600 text-white rounded-full p-3"
           >
             {isPlaying ? <IoMdPause size={28} /> : <IoMdPlay size={28} />}
