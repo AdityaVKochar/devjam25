@@ -39,7 +39,7 @@ export default function EchoTalesPage({ fileTitle, onBack }: MainProps) {
           <FiChevronLeft size={20} />
           <span className="font-medium">back</span>
         </div>
-        <h1 className="text-lg font-semibold text-white">
+        <h1 className="text-lg font-semibold text-blue-400 flex-1 text-center">
           {fileTitle ?? "PDF TITLE / LINK URL"}
         </h1>
         <button

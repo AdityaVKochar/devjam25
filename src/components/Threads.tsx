@@ -124,13 +124,14 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
       uAmplitude,
       uDistance
     );
-    // Gradient: green, cyan, blue, purple, pink from left (x=0) to right (x=1)
+        // Gradient: different shades of blue across x
     float t = uv.x;
-    vec3 color1 = vec3(0.0, 1.0, 0.4); // green
-    vec3 color2 = vec3(0.0, 1.0, 1.0); // cyan
-    vec3 color3 = vec3(0.0, 0.4, 1.0); // blue
-    vec3 color4 = vec3(0.6, 0.0, 1.0); // purple
-    vec3 color5 = vec3(1.0, 0.0, 0.6); // pink
+    vec3 color1 = vec3(0.3, 0.6, 1.0);  // light sky blue
+    vec3 color2 = vec3(0.0, 0.4, 1.0);  // medium blue
+    vec3 color3 = vec3(0.0, 0.2, 0.6);  // deep navy
+    vec3 color4 = vec3(0.2, 0.0, 0.6);  // indigo violet-blue
+    vec3 color5 = vec3(0.0, 0.7, 0.9);  // teal/cyan-blue
+
     vec3 gradColor;
     if (t < 0.25) {
       gradColor = mix(color1, color2, t / 0.25);
@@ -141,6 +142,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     } else {
       gradColor = mix(color4, color5, (t - 0.75) / 0.25);
     }
+
     finalColor += gradColor * line;
     alpha += line;
   }
@@ -168,7 +170,7 @@ function isWebGLAvailable() {
 
 const Threads: React.FC<ThreadsProps> = ({
   color = [1, 1, 1],
-  amplitude = 1,
+  amplitude = 2,
   distance = 0 ,
   enableMouseInteraction = true,
   ...rest
