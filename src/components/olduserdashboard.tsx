@@ -8,6 +8,7 @@ export default function OldUserDashboard() {
 
   const [activeTab, setActiveTab] = useState("library");
   const [files, setFiles] = useState<{ name: string }[]>([]);
+  const [search, setSearch] = useState("");
   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
   React.useEffect(() => {
@@ -29,6 +30,11 @@ export default function OldUserDashboard() {
     console.log("submitted link:", link);
     setIsPopupOpen(false);
   };
+
+  // Filter files based on search
+  const filteredFiles = files.filter(file =>
+    file.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-700 to-black text-white">
@@ -81,6 +87,8 @@ export default function OldUserDashboard() {
                 <input
                   type="text"
                   placeholder="search"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
                   className="flex-1 bg-[#C7D0E9] text-black rounded px-3 py-2"
                 />
                 <button
@@ -92,7 +100,7 @@ export default function OldUserDashboard() {
                 </button>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4 mb-4 flex-grow">
-                {files.map((file, index) => (
+                {filteredFiles.map((file, index) => (
                   <div
                     key={index}
                     className="bg-[#C7D0E9] text-black rounded p-4 flex flex-col justify-between h-38"
