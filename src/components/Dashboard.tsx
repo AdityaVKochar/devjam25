@@ -8,37 +8,27 @@ export default function OldUserDashboard() {
 
   const [activeTab, setActiveTab] = useState("library");
   const [files, setFiles] = useState<{ name: string }[]>([]);
-  const [search, setSearch] = useState("");
   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
-  // Fetch files helper
-  const fetchFiles = async () => {
-    try {
-      const res = await fetch("/api/files");
-      const data = await res.json();
-      if (data.files && Array.isArray(data.files)) {
-        setFiles(data.files.map((f: any) => ({ name: f.bookid })));
-      }
-    } catch (err) {
-      console.error("Failed to fetch files", err);
-    }
-  };
-
   React.useEffect(() => {
+    async function fetchFiles() {
+      try {
+        const res = await fetch("/api/files");
+        const data = await res.json();
+        if (data.files && Array.isArray(data.files)) {
+          setFiles(data.files.map((f: any) => ({ name: f.bookid })));
+        }
+      } catch (err) {
+        console.error("Failed to fetch files", err);
+      }
+    }
     fetchFiles();
   }, []);
 
-  const handleSubmit = async (link: string) => {
+  const handleSubmit = (link: string) => {
     console.log("submitted link:", link);
     setIsPopupOpen(false);
-    // Wait a moment for backend to update, then refresh files
-    setTimeout(fetchFiles, 500);
   };
-
-  // Filter files based on search
-  const filteredFiles = files.filter(file =>
-    file.name.toLowerCase().includes(search.toLowerCase())
-  );
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-700 to-black text-white">
@@ -91,8 +81,6 @@ export default function OldUserDashboard() {
                 <input
                   type="text"
                   placeholder="search"
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
                   className="flex-1 bg-[#C7D0E9] text-black rounded px-3 py-2"
                 />
                 <button
@@ -104,7 +92,7 @@ export default function OldUserDashboard() {
                 </button>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4 mb-4 flex-grow">
-                {filteredFiles.map((file, index) => (
+                {files.map((file, index) => (
                   <div
                     key={index}
                     className="bg-[#C7D0E9] text-black rounded p-4 flex flex-col justify-between h-38"
@@ -121,6 +109,29 @@ export default function OldUserDashboard() {
                       </button>
                       <button
                         type="button"
+                        onClick={async () => {
+                          const confirmDel = confirm(`Delete '${file.name}'?`);
+                          if (!confirmDel) return;
+                          const previous = [...files];
+                          try {
+                            setFiles((f) => f.filter((_, i) => i !== index));
+
+                            const res = await fetch(`/api/files`, {
+                              method: "DELETE",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ name: file.name }),
+                            });
+
+                            if (!res.ok) {
+                              throw new Error(`Server responded ${res.status}`);
+                            }
+                          } catch (err) {
+                            console.error("Delete failed", err);
+                           
+                            setFiles(previous);
+                            alert("Failed to delete file on server. Restored in UI.");
+                          }
+                        }}
                         className="px-4 py-1 text-white text-sm font-bold border-2 border-blue-700 rounded-[7px] bg-gradient-to-r from-[#197AF0] to-[#0252C5] shadow-[4px_4px_1px_0_#B1C2F4] cursor-pointer"
                       >
                         delete
