@@ -3,12 +3,15 @@ import React, { useState } from "react";
 import { signOut } from "next-auth/react";
 import Popup from "./Popup";
 import Image from "next/image";
+import Main from "./Main";
 
 export default function OldUserDashboard() {
 
   const [activeTab, setActiveTab] = useState("library");
   const [files, setFiles] = useState<{ name: string }[]>([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isMainOpen, setIsMainOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
   React.useEffect(() => {
     async function fetchFiles() {
@@ -103,6 +106,10 @@ export default function OldUserDashboard() {
                     <div className="flex justify-center space-x-6">
                       <button
                         type="button"
+                        onClick={() => {
+                          setSelectedFile(file.name);
+                          setIsMainOpen(true);
+                        }}
                         className="px-4 py-1 text-white text-sm font-bold border-2 border-blue-700 rounded-[7px] bg-gradient-to-r from-[#197AF0] to-[#0252C5] shadow-[4px_4px_1px_0_#B1C2F4] cursor-pointer"
                       >
                         listen
@@ -198,6 +205,13 @@ Record now.
         </div>
       </main>
       <Popup isOpen={isPopupOpen} onCancel={() => setIsPopupOpen(false)} onSubmit={handleSubmit} />
+      {isMainOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex">
+          <div className="m-auto w-full h-full">
+            <Main fileTitle={selectedFile} onBack={() => setIsMainOpen(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
