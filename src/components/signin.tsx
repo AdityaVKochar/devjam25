@@ -26,9 +26,7 @@ export default function SignIn(): React.ReactElement {
             Listen to your stories, whenever you like
           </h2>
           <p className="mt-4 leading-relaxed text-white/75">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi
-            lobortis maximus nunc, ac rhoncus odio congue quis. Sed ac semper
-            orci, eu porttitor lacus.
+            Echotalks transforms text into lifelike audio so you can enjoy stories, articles, and fanfictions anytime, anywhere. Sign in now and start listening on the go.
           </p>
 
           <div>
