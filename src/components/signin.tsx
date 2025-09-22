@@ -20,7 +20,7 @@ export default function SignIn(): React.ReactElement {
       </div>
 
       {/* Center card */}
-      <div className="relative z-10 flex w-full justify-start md:justify-left px-6 sm:px-10">
+      <div className="relative z-10 flex w-full justify-end md:justify-left px-6 sm:px-10">
         <div className="w-full max-w-lg md:max-w-2xl md:mx-0 rounded-2xl border border-white/50 bg-black/40 p-6 sm:p-10 md:p-30 md:min-h-[480px] shadow-xl backdrop-blur-md">
           <h2 className="text-2xl font-bold text-white sm:text-3xl md:text-4xl">
             Listen to your stories, whenever you like

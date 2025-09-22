@@ -36,10 +36,10 @@ export default function OldUserDashboard() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-700 to-black text-white">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-500 to-blue-1100 text-white">
       {/* Header */}
       <header className="flex justify-between items-center px-6 py-4">
-        <h1 className="text-sm font-semibold">EchoTales</h1>
+        <h1 className="text-lg font-semibold">EchoTales</h1>
         <button
           onClick={() => signOut({ callbackUrl: "/signin" })}
           className="bg-black text-white rounded px-4 py-1 hover:opacity-90 cursor-pointer"
@@ -49,24 +49,31 @@ export default function OldUserDashboard() {
       </header>
 
       {/* Tab Toggle */}
-      <div className="flex justify-center mt-4 space-x-2">
-        <button
-          onClick={() => setActiveTab("library")}
-          className={`px-6 py-2 rounded cursor-pointer ${
-            activeTab === "library" ? "bg-blue-500 text-white" : "bg-black text-white"
-          }`}
-        >
-          Library
-        </button>
-        <button
-          onClick={() => setActiveTab("customisation")}
-          className={`px-6 py-2 rounded cursor-pointer ${
-            activeTab === "customisation" ? "bg-blue-500 text-white" : "bg-black text-white"
-          }`}
-        >
-          Customisation
-        </button>
-      </div>
+<div className="flex justify-center mt-4">
+  <div className="flex bg-[#0f172a] rounded-lg overflow-hidden border-2 border-black">
+    <button
+      onClick={() => setActiveTab("library")}
+      className={`px-6 py-2 font-semibold transition-colors ${
+        activeTab === "library"
+          ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
+          : "text-white"
+      }`}
+    >
+      Library
+    </button>
+    <button
+      onClick={() => setActiveTab("customisation")}
+      className={`px-6 py-2 font-semibold transition-colors ${
+        activeTab === "customisation"
+          ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
+          : "text-white"
+      }`}
+    >
+      Customisation
+    </button>
+  </div>
+</div>
+
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center px-6 pt-6 mb-6">
@@ -102,48 +109,18 @@ export default function OldUserDashboard() {
                     key={index}
                     className="bg-[#C7D0E9] text-black rounded p-4 flex flex-col justify-between h-38"
                   >
-                    <p className="truncate w-full text-sm mb-2 text-center">
+                    <p className="truncate w-full text-lg mb-2 mt-6 text-center">
                       {file.name}
                     </p>
                     <div className="flex justify-center space-x-6">
                       <button
                         type="button"
                         onClick={() => {
-                          // navigate to /listen route with title query
                           router.push(`/listen?title=${encodeURIComponent(file.name)}`);
                         }}
-                        className="px-4 py-1 text-white text-sm font-bold border-2 border-blue-700 rounded-[7px] bg-gradient-to-r from-[#197AF0] to-[#0252C5] shadow-[4px_4px_1px_0_#B1C2F4] cursor-pointer"
+                        className="px-12 py-1 text-white text-sm font-bold border-2 border-blue-700 rounded-[7px] bg-gradient-to-r from-[#197AF0] to-[#0252C5] shadow-[4px_4px_1px_0_#B1C2F4] cursor-pointer"
                       >
                         listen
-                      </button>
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          const confirmDel = confirm(`Delete '${file.name}'?`);
-                          if (!confirmDel) return;
-                          const previous = [...files];
-                          try {
-                            setFiles((f) => f.filter((_, i) => i !== index));
-
-                            const res = await fetch(`/api/files`, {
-                              method: "DELETE",
-                              headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({ name: file.name }),
-                            });
-
-                            if (!res.ok) {
-                              throw new Error(`Server responded ${res.status}`);
-                            }
-                          } catch (err) {
-                            console.error("Delete failed", err);
-                           
-                            setFiles(previous);
-                            alert("Failed to delete file on server. Restored in UI.");
-                          }
-                        }}
-                        className="px-4 py-1 text-white text-sm font-bold border-2 border-blue-700 rounded-[7px] bg-gradient-to-r from-[#197AF0] to-[#0252C5] shadow-[4px_4px_1px_0_#B1C2F4] cursor-pointer"
-                      >
-                        delete
                       </button>
                     </div>
                   </div>
