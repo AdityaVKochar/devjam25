@@ -6,7 +6,7 @@ import Image from "next/image";
 import Main from "./Main";
 import { useRouter } from "next/navigation";
 
-export default function OldUserDashboard() {
+export default function Dashboard() {
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState("library");
@@ -14,6 +14,13 @@ export default function OldUserDashboard() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isMainOpen, setIsMainOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [selectedAudioName, setSelectedAudioName] = useState<string | null>(null);
+  const [selectedAudioData, setSelectedAudioData] = useState<string | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState<any>(null);
+  const audioChunksRef = React.useRef<Blob[]>([]);
+  const audioInputRef = React.useRef<HTMLInputElement | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   React.useEffect(() => {
     async function fetchFiles() {
@@ -30,9 +37,68 @@ export default function OldUserDashboard() {
     fetchFiles();
   }, []);
 
-  const handleSubmit = (link: string) => {
-    console.log("submitted link:", link);
+  const handleSubmit = async (payload: { type: "file" | "link" | "voice"; value: any }) => {
+    console.log("popup submit payload:", payload);
     setIsPopupOpen(false);
+
+    if (payload.type === "file") {
+      try {
+        const res = await fetch("/api/generate-story", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ filename: payload.value }),
+        });
+        const data = await res.json();
+        if (data?.file) {
+         
+          setFiles((cur) => [{ name: data.file.title || data.file.bookid }, ...cur]);
+        } else {
+          console.error("generate-story returned no file", data);
+        }
+      } catch (err) {
+        console.error("Failed to generate story", err);
+      }
+      return;
+    }
+
+    if (payload.type === 'voice') {
+      try {
+        const r = await uploadVoice(payload.value.filename, payload.value.data);
+        if (r && r.success) {
+
+          setFiles((cur) => [{ name: payload.value.filename }, ...cur]);
+
+          setSuccessMessage(`${payload.value.filename} uploaded successfully`);
+          setTimeout(() => setSuccessMessage(null), 4000);
+        }
+      } catch (err) {
+        console.error('Failed to upload voice', err);
+      }
+      return;
+    }
+
+    console.log("submitted link:", payload.value);
+  };
+
+  const uploadVoice = async (filename: string, dataUrl: string) => {
+    try {
+      const res = await fetch('/api/upload-voice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename, data: dataUrl }),
+      });
+      const j = await res.json();
+      if (!res.ok) {
+        console.error('Failed to upload voice', j);
+        alert('Failed to upload voice');
+        return null;
+      }
+      return j;
+    } catch (err) {
+      console.error('uploadVoice error', err);
+      alert('Failed to upload voice');
+      return null;
+    }
   };
 
   return (
@@ -48,9 +114,15 @@ export default function OldUserDashboard() {
         </button>
       </header>
 
+      {successMessage && (
+        <div className="mx-6 mt-3 p-3 rounded bg-green-600 text-white text-sm">
+          {successMessage}
+        </div>
+      )}
+
       {/* Tab Toggle */}
 <div className="flex justify-center mt-4">
-  <div className="flex bg-[#0f172a] rounded-lg overflow-hidden border-2 border-black">
+  <div className="flex bg-[#0f172a] rounded-lg overflow-hidden border-5 border-black">
     <button
       onClick={() => setActiveTab("library")}
       className={`px-6 py-2 font-semibold transition-colors ${
@@ -154,12 +226,34 @@ Record now.
                       upload your recording here : <br />
                       <span className="text-gray-500">supported formats: mp3</span>
                     </span>
-                    <button
-                      type="button"
-                      className="px-4 py-1 text-white text-sm font-bold border-2 border-blue-700 rounded-[7px] bg-gradient-to-r from-[#197AF0] to-[#0252C5] shadow-[4px_4px_1px_0_#B1C2F4] cursor-pointer"
-                    >
-                      voice recording
-                    </button>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => audioInputRef.current?.click()}
+                          className="px-4 py-1 text-white text-sm font-bold border-2 border-blue-700 rounded-[7px] bg-gradient-to-r from-[#197AF0] to-[#0252C5] shadow-[4px_4px_1px_0_#B1C2F4] cursor-pointer"
+                        >
+                          upload audio
+                        </button>
+                        <input
+                          ref={audioInputRef}
+                          type="file"
+                          accept="audio/*"
+                          className="hidden"
+                          onChange={async (e) => {
+                            const f = e.target.files && e.target.files[0];
+                            if (f) {
+                              setSelectedAudioName(f.name);
+                              try {
+                                const arrayBuffer = await f.arrayBuffer();
+                                const b64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+                                setSelectedAudioData(`data:${f.type};base64,${b64}`);
+                              } catch (err) {
+                                console.error('Failed to read audio file', err);
+                              }
+                            }
+                          }}
+                        />
+                      </div>
                   </div>
                 </section>
 
@@ -173,7 +267,44 @@ Record now.
 				                        
                   <div className="flex flex-col items-center">
 					<Image src="/wave.svg" alt="mic" width={200} height={200} />
-                    <button className="hover:scale-105 transition mt-6 cursor-pointer">
+                    <button
+                      onClick={async () => {
+                        if (isRecording) {
+                          
+                          mediaRecorder?.stop();
+                          setIsRecording(false);
+                        } else {
+                          try {
+                            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                            const mr = new MediaRecorder(stream);
+                            audioChunksRef.current = [];
+                            mr.ondataavailable = (ev: any) => {
+                              if (ev.data && ev.data.size > 0) audioChunksRef.current.push(ev.data);
+                            };
+                            mr.onstop = async () => {
+                              const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                              const arrayBuffer = await blob.arrayBuffer();
+                              const b64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+                              const name = `recording-${Date.now()}.webm`;
+                              setSelectedAudioData(`data:audio/webm;base64,${b64}`);
+                              setSelectedAudioName(name);
+                              const res = await uploadVoice(name, `data:audio/webm;base64,${b64}`);
+                              if (res && res.success) {
+                                setFiles(cur => [{ name }, ...cur]);
+                                alert('Recording uploaded');
+                              }
+                            };
+                            mr.start();
+                            setMediaRecorder(mr);
+                            setIsRecording(true);
+                          } catch (err) {
+                            console.error('Microphone access denied or not available', err);
+                            alert('Unable to access microphone');
+                          }
+                        }
+                      }}
+                      className={`hover:scale-105 transition mt-6 cursor-pointer ${isRecording ? 'ring-4 ring-green-400 rounded-full' : ''}`}
+                    >
                       <Image src="/mic.svg" alt="mic" width={60} height={60} />
                     </button>
                   </div>

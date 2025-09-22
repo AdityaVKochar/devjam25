@@ -1,17 +1,32 @@
+"use client";
+
 import React, { useState } from "react";
 
 interface PopupProps {
   isOpen: boolean;
   onCancel: () => void;
-  onSubmit: (link: string) => void;
+  onSubmit: (payload: { type: "file" | "link"; value: any }) => void;
 }
 
 const Popup: React.FC<PopupProps> = ({ isOpen, onCancel, onSubmit }) => {
   const [link, setLink] = useState("");
+  const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
+  const [selectedFileContent, setSelectedFileContent] = useState<string | null>(null);
+  const [uploaded, setUploaded] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
   if (!isOpen) return null;
 
   const handleSmartSubmit = async () => {
+    if (uploaded && selectedFileName && selectedFileContent != null) {
+      onSubmit({ type: "file", value: { filename: selectedFileName, content: selectedFileContent } });
+      setSelectedFileName(null);
+      setSelectedFileContent(null);
+      setUploaded(false);
+      setLink("");
+      return;
+    }
+
     const match = link.match(/^https:\/\/novelbin\.com\/b\/[^/?#]+/);
     if (match) {
       try {
@@ -20,12 +35,12 @@ const Popup: React.FC<PopupProps> = ({ isOpen, onCancel, onSubmit }) => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ link }),
         });
-        onSubmit(link);
+        onSubmit({ type: "link", value: link });
       } catch (err) {
         alert("Failed to process the link. Please try again.");
       }
     } else {
-      onSubmit(link);
+      onSubmit({ type: "link", value: link });
     }
   };
 
@@ -46,7 +61,7 @@ const Popup: React.FC<PopupProps> = ({ isOpen, onCancel, onSubmit }) => {
 
         {/* Upload file section */}
         <div className="w-full flex flex-col items-center mb-10">
-          <div className="flex flex-row items-center justify-center w-fit gap-25">
+            <div className="flex flex-row items-center justify-center w-fit gap-25">
             <div className="flex flex-col items-start mb-1">
               <span className="text-white text-lg font-semibold mr-4 text-left">upload your document here:</span>
               <span
@@ -65,17 +80,67 @@ const Popup: React.FC<PopupProps> = ({ isOpen, onCancel, onSubmit }) => {
                 supported formats: pdf/txt
               </span>
             </div>
-            <button
-              type="button"
-              style={{
-                borderRadius: "7px",
-                background: "var(--blue-grad, linear-gradient(90deg, #197AF0 0%, #0252C5 100%))",
-                boxShadow: "4px 4px 1px 0 #B1C2F4"
-              }}
-              className="px-6 py-2 text-white font-bold transition-colors border-2 border-blue-700 ml-4 cursor-pointer"
-            >
-              upload from you device
-            </button>
+            <div className="ml-4">
+              <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                style={{
+                  borderRadius: "7px",
+                  background: "var(--blue-grad, linear-gradient(90deg, #197AF0 0%, #0252C5 100%))",
+                  boxShadow: "4px 4px 1px 0 #B1C2F4"
+                }}
+                className="px-6 py-2 text-white font-bold transition-colors border-2 border-blue-700 cursor-pointer"
+              >
+                upload from your device
+              </button>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".txt"
+                className="hidden"
+                onChange={async (e) => {
+                  const f = e.target.files && e.target.files[0];
+                  if (f) {
+                    setSelectedFileName(f.name);
+                    setUploaded(false);
+                    try {
+                      const text = await f.text();
+                      setSelectedFileContent(text);
+                    } catch (err) {
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        setSelectedFileContent(String(reader.result || ""));
+                      };
+                      reader.readAsText(f);
+                    }
+                  }
+                }}
+              />
+
+              {selectedFileName && !uploaded && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUploaded(true);
+                  }}
+                  className="px-3 py-1 bg-green-600 text-white rounded"
+                >
+                  OK
+                </button>
+              )}
+              </div>
+
+              <div className="mt-2 text-sm">
+                {selectedFileName && (
+                  <div className="text-gray-300">{selectedFileName}</div>
+                )}
+                {uploaded && (
+                  <div className="text-green-300 mt-1">File uploaded successfully</div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -112,7 +177,12 @@ const Popup: React.FC<PopupProps> = ({ isOpen, onCancel, onSubmit }) => {
         {/* Buttons */}
   <div className="flex w-full gap-4 justify-center items-center">
           <button
-            onClick={onCancel}
+            onClick={() => {
+              setSelectedFileName(null);
+              setUploaded(false);
+              setLink("");
+              onCancel();
+            }}
               style={{
                 borderRadius: "7px",
                 background: "var(--blue-grad, linear-gradient(90deg, #197AF0 0%, #0252C5 100%))",

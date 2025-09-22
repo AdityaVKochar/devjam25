@@ -21,7 +21,6 @@ export default function EchoTalesPage({ fileTitle, onBack }: MainProps) {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  // Fetch lines from DB when fileTitle (bookid) is present
   useEffect(() => {
     const fetchLines = async () => {
       if (!fileTitle) return;
@@ -109,10 +108,10 @@ export default function EchoTalesPage({ fileTitle, onBack }: MainProps) {
               type="button"
               className="px-6 py-2 justify-center text-white font-bold 
               transition-colors border-2 border-blue-600 rounded-[7px] 
-              bg-gradient-to-r from-blue-600 to-blue-700 
+              bg-blue-500 
               shadow-[4px_4px_1px_0_#2b3c64] cursor-pointer"
             >
-              record voice now!
+              use voice!
             </button>
           </div>
         </div>
