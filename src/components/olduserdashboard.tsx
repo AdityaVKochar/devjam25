@@ -5,16 +5,25 @@ import Popup from "./Popup";
 import Image from "next/image";
 
 export default function OldUserDashboard() {
+
   const [activeTab, setActiveTab] = useState("library");
-
-  const files = [
-    { name: "name-pdf.pdf" },
-    { name: "https://z-lib/emily-br..." },
-    { name: "name-pdf.pdf" },
-    { name: "no-name.txt" },
-  ];
-
+  const [files, setFiles] = useState<{ name: string }[]>([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+  React.useEffect(() => {
+    async function fetchFiles() {
+      try {
+        const res = await fetch("/api/files");
+        const data = await res.json();
+        if (data.files && Array.isArray(data.files)) {
+          setFiles(data.files.map((f: any) => ({ name: f.bookid })));
+        }
+      } catch (err) {
+        console.error("Failed to fetch files", err);
+      }
+    }
+    fetchFiles();
+  }, []);
 
   const handleSubmit = (link: string) => {
     console.log("submitted link:", link);
@@ -28,7 +37,7 @@ export default function OldUserDashboard() {
         <h1 className="text-sm font-semibold">EchoTales</h1>
         <button
           onClick={() => signOut({ callbackUrl: "/signin" })}
-          className="bg-black text-white rounded px-4 py-1 hover:opacity-90"
+          className="bg-black text-white rounded px-4 py-1 hover:opacity-90 cursor-pointer"
         >
           sign out
         </button>
@@ -38,7 +47,7 @@ export default function OldUserDashboard() {
       <div className="flex justify-center mt-4 space-x-2">
         <button
           onClick={() => setActiveTab("library")}
-          className={`px-6 py-2 rounded ${
+          className={`px-6 py-2 rounded cursor-pointer ${
             activeTab === "library" ? "bg-blue-500 text-white" : "bg-black text-white"
           }`}
         >
@@ -46,7 +55,7 @@ export default function OldUserDashboard() {
         </button>
         <button
           onClick={() => setActiveTab("customisation")}
-          className={`px-6 py-2 rounded ${
+          className={`px-6 py-2 rounded cursor-pointer ${
             activeTab === "customisation" ? "bg-blue-500 text-white" : "bg-black text-white"
           }`}
         >
@@ -76,18 +85,12 @@ export default function OldUserDashboard() {
                 />
                 <button
                   type="button"
-                  style={{
-                    borderRadius: "7px",
-                    background: "linear-gradient(90deg, #197AF0 0%, #0252C5 100%)",
-                    boxShadow: "4px 4px 1px 0 #B1C2F4",
-                  }}
-                  className="px-6 py-2 text-white font-bold transition-colors border-2 border-blue-700 ml-4"
+                  className="px-6 py-2 text-white font-bold transition-colors border-2 border-blue-700 ml-4 rounded-[7px] bg-gradient-to-r from-[#197AF0] to-[#0252C5] shadow-[4px_4px_1px_0_#B1C2F4] cursor-pointer"
                   onClick={() => setIsPopupOpen(true)}
                 >
                   upload here
                 </button>
               </div>
-
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4 mb-4 flex-grow">
                 {files.map((file, index) => (
                   <div
@@ -97,32 +100,21 @@ export default function OldUserDashboard() {
                     <p className="truncate w-full text-sm mb-2 text-center">
                       {file.name}
                     </p>
-					<div className="flex justify-center space-x-6">
+                    <div className="flex justify-center space-x-6">
                       <button
                         type="button"
-                        style={{
-                          borderRadius: "7px",
-                          background: "linear-gradient(90deg, #197AF0 0%, #0252C5 100%)",
-                          boxShadow: "4px 4px 1px 0 #B1C2F4",
-                        }}
-                        className="px-4 py-1 text-white text-sm font-bold border-2 border-blue-700"
+                        className="px-4 py-1 text-white text-sm font-bold border-2 border-blue-700 rounded-[7px] bg-gradient-to-r from-[#197AF0] to-[#0252C5] shadow-[4px_4px_1px_0_#B1C2F4] cursor-pointer"
                       >
                         listen
                       </button>
                       <button
                         type="button"
-                        style={{
-                          borderRadius: "7px",
-                          background: "linear-gradient(90deg, #197AF0 0%, #0252C5 100%)",
-                          boxShadow: "4px 4px 1px 0 #B1C2F4",
-                        }}
-                        className="px-4 py-1 text-white text-sm font-bold border-2 border-blue-700"
+                        className="px-4 py-1 text-white text-sm font-bold border-2 border-blue-700 rounded-[7px] bg-gradient-to-r from-[#197AF0] to-[#0252C5] shadow-[4px_4px_1px_0_#B1C2F4] cursor-pointer"
                       >
                         delete
                       </button>
                     </div>
                   </div>
-				  
                 ))}
               </div>
             </div>
@@ -154,16 +146,11 @@ Record now.
                       <span className="text-gray-500">supported formats: mp3</span>
                     </span>
                     <button
-                        type="button"
-                        style={{
-                          borderRadius: "7px",
-                          background: "linear-gradient(90deg, #197AF0 0%, #0252C5 100%)",
-                          boxShadow: "4px 4px 1px 0 #B1C2F4",
-                        }}
-                        className="px-4 py-1 text-white text-sm font-bold border-2 border-blue-700"
-                      >
-                        voice recording
-                      </button>
+                      type="button"
+                      className="px-4 py-1 text-white text-sm font-bold border-2 border-blue-700 rounded-[7px] bg-gradient-to-r from-[#197AF0] to-[#0252C5] shadow-[4px_4px_1px_0_#B1C2F4] cursor-pointer"
+                    >
+                      voice recording
+                    </button>
                   </div>
                 </section>
 
@@ -177,7 +164,7 @@ Record now.
 				                        
                   <div className="flex flex-col items-center">
 					<Image src="/wave.svg" alt="mic" width={200} height={200} />
-                    <button className="hover:scale-105 transition mt-6">
+                    <button className="hover:scale-105 transition mt-6 cursor-pointer">
                       <Image src="/mic.svg" alt="mic" width={60} height={60} />
                     </button>
                   </div>

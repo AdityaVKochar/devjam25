@@ -54,7 +54,7 @@ const Popup: React.FC<PopupProps> = ({ isOpen, onCancel, onSubmit }) => {
                 background: "var(--blue-grad, linear-gradient(90deg, #197AF0 0%, #0252C5 100%))",
                 boxShadow: "4px 4px 1px 0 #B1C2F4"
               }}
-              className="px-6 py-2 text-white font-bold transition-colors border-2 border-blue-700 ml-4"
+              className="px-6 py-2 text-white font-bold transition-colors border-2 border-blue-700 ml-4 cursor-pointer"
             >
               upload from you device
             </button>
@@ -108,7 +108,7 @@ const Popup: React.FC<PopupProps> = ({ isOpen, onCancel, onSubmit }) => {
                 lineHeight: "normal",
                 padding: "12px 32px"
               }}
-              className="text-white font-bold py-2 transition-colors border-2 border-blue-700"
+              className="text-white font-bold py-2 transition-colors border-2 border-blue-700 cursor-pointer"
           >
             cancel
           </button>
@@ -127,7 +127,7 @@ const Popup: React.FC<PopupProps> = ({ isOpen, onCancel, onSubmit }) => {
                 lineHeight: "normal",
                 padding: "12px 32px"
               }}
-              className="text-white font-bold py-2 transition-colors border-2 border-blue-700"
+              className="text-white font-bold py-2 transition-colors border-2 border-blue-700 cursor-pointer"
           >
             submit
           </button>
