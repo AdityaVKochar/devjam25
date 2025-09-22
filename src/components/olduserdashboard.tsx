@@ -11,24 +11,28 @@ export default function OldUserDashboard() {
   const [search, setSearch] = useState("");
   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
-  React.useEffect(() => {
-    async function fetchFiles() {
-      try {
-        const res = await fetch("/api/files");
-        const data = await res.json();
-        if (data.files && Array.isArray(data.files)) {
-          setFiles(data.files.map((f: any) => ({ name: f.bookid })));
-        }
-      } catch (err) {
-        console.error("Failed to fetch files", err);
+  // Fetch files helper
+  const fetchFiles = async () => {
+    try {
+      const res = await fetch("/api/files");
+      const data = await res.json();
+      if (data.files && Array.isArray(data.files)) {
+        setFiles(data.files.map((f: any) => ({ name: f.bookid })));
       }
+    } catch (err) {
+      console.error("Failed to fetch files", err);
     }
+  };
+
+  React.useEffect(() => {
     fetchFiles();
   }, []);
 
-  const handleSubmit = (link: string) => {
+  const handleSubmit = async (link: string) => {
     console.log("submitted link:", link);
     setIsPopupOpen(false);
+    // Wait a moment for backend to update, then refresh files
+    setTimeout(fetchFiles, 500);
   };
 
   // Filter files based on search
