@@ -1,16 +1,25 @@
 "use client";
 import { useState } from "react";
 import { signOut } from "next-auth/react";
+import Popup from "./Popup";
+import Image from "next/image";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("Library");
 
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+  const handleSubmit = (link: string) => {
+    console.log("submitted link:", link);
+    setIsPopupOpen(false);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-[#07102e] to-[#08307a] text-white flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-black via-[#07102e] to-[#1F6DE0] text-white flex flex-col">
       {/* Top Navbar */}
       <div className="relative px-6 py-4">
         <div className="flex items-center justify-between">
-          <span className="text-lg font-semibold">brandname</span>
+          <span className="text-lg font-semibold">EchoTales</span>
           <button
             onClick={() => signOut({ callbackUrl: "/signin" })}
             className="px-4 py-1 rounded-md bg-gray-800 text-sm text-gray-200 hover:bg-gray-700"
@@ -39,8 +48,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center px-6 pb-12">
+  {/* Main Content */}
+  <div className="flex-1 flex items-center justify-center px-6 pb-12">
         {activeTab === "Library" ? (
           <div className="w-full max-w-5xl mx-auto rounded-2xl bg-gradient-to-b from-[#081022] to-[#0b0b0b] shadow-2xl p-12 h-full flex flex-col justify-center">
             <div className="flex-1 rounded-xl bg-gradient-to-b from-black/40 to-black/80 p-8 flex flex-col items-center justify-center text-center">
@@ -50,12 +59,15 @@ export default function Home() {
               <h2 className="text-2xl font-extrabold mb-6">
                 LISTEN TO YOUR FIRST AUDIOBOOK TODAY!
               </h2>
-              <button className="px-6 py-2 rounded-md bg-blue-500 hover:bg-blue-600 text-white shadow-md">
+              <button
+                onClick={() => setIsPopupOpen(true)}
+                className="px-6 py-2 rounded-md bg-blue-500 hover:bg-blue-600 text-white shadow-md"
+              >
                 upload here
               </button>
             </div>
           </div>
-        ) : (
+  ) : (
           <div className="w-full max-w-5xl mx-auto h-full flex-1">
             
             <div className="flex-1 flex items-center justify-center text-white overflow-hidden">
@@ -66,9 +78,8 @@ export default function Home() {
                     Customise stories with your voice
                   </h2>
                   <p className="text-gray-300 mb-6 leading-relaxed">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi
-                    lobortis maximus nunc, ac rhoncus odio congue quis. Sed ac semper
-                    orci, eu porttitor lacus...
+                    Customise how your stories sound. Make every story uniquely yours. Record your own voice or upload a file to bring characters and narration to life in a way that feels personal. Your voice, your story.
+Record now. 
                   </p>
 
                   {/* Divider */}
@@ -105,8 +116,8 @@ export default function Home() {
                     press the button below to start recording
                   </p>
                   <div className="flex flex-col items-center">
-                    <button className="bg-white text-black p-4 rounded-full hover:scale-105 transition">
-                      🎤
+                    <button className="hover:scale-105 transition">
+                      <Image src="/mic.svg" alt="mic" width={20} height={20} />
                     </button>
                   </div>
                 </section>
@@ -115,6 +126,8 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      <Popup isOpen={isPopupOpen} onCancel={() => setIsPopupOpen(false)} onSubmit={handleSubmit} />
     </div>
   );
 }

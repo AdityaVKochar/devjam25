@@ -21,5 +21,5 @@ export async function GET(req: Request) {
     await db.collection("users").updateOne({ email: session.user.email }, { $set: { isNew: false } });
   }
 
-  return NextResponse.redirect(new URL("/newuserdashboard", process.env.NEXTAUTH_URL));
+  return NextResponse.redirect(new URL("/dashboard", process.env.NEXTAUTH_URL));
 }
