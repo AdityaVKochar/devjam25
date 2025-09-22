@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FaUserCircle } from "react-icons/fa";
@@ -14,8 +14,35 @@ type MainProps = {
 };
 
 export default function EchoTalesPage({ fileTitle, onBack }: MainProps) {
+
   const [isPlaying, setIsPlaying] = useState(false);
+  const [lines, setLines] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  // Fetch lines from DB when fileTitle (bookid) is present
+  useEffect(() => {
+    const fetchLines = async () => {
+      if (!fileTitle) return;
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(`/api/booklines?bookid=${encodeURIComponent(fileTitle)}`);
+        const data = await res.json();
+        if (data.lines && Array.isArray(data.lines)) {
+          setLines(data.lines);
+        } else {
+          setError("No lines found for this book.");
+        }
+      } catch (err) {
+        setError("Failed to fetch book lines.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchLines();
+  }, [fileTitle]);
 
   return (
     <div className="h-screen w-screen bg-gradient-to-b from-[#1a1c24] to-black text-white flex flex-col">
@@ -92,14 +119,17 @@ export default function EchoTalesPage({ fileTitle, onBack }: MainProps) {
 
         {/* Reader Section */}
         <div className="flex-1 bg-gradient-to-b from-[#1f2430] to-black p-6 overflow-y-auto leading-relaxed text-gray-200">
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi
-            lobortis maximus nunc, ac rhoncus odio congue quis. Sed ac semper
-            orci, eu porttitor lacus...
-          </p>
-          <p className="mt-6 text-gray-300">
-            (repeat dummy text as much as needed to match UI)
-          </p>
+          {loading ? (
+            <p>Loading book...</p>
+          ) : error ? (
+            <p className="text-red-400">{error}</p>
+          ) : lines.length > 0 ? (
+            lines.map((line, idx) => (
+              <p key={idx} className="mb-4">{line}</p>
+            ))
+          ) : (
+            <p>No content found for this book.</p>
+          )}
         </div>
       </div>
 
