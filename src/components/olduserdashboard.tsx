@@ -119,6 +119,12 @@ export default function OldUserDashboard() {
                       >
                         listen
                       </button>
+                      <button
+                        type="button"
+                        className="px-4 py-1 text-white text-sm font-bold border-2 border-blue-700 rounded-[7px] bg-gradient-to-r from-[#197AF0] to-[#0252C5] shadow-[4px_4px_1px_0_#B1C2F4] cursor-pointer"
+                      >
+                        delete
+                      </button>
                     </div>
                   </div>
                 ))}
