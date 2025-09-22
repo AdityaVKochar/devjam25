@@ -4,8 +4,10 @@ import { signOut } from "next-auth/react";
 import Popup from "./Popup";
 import Image from "next/image";
 import Main from "./Main";
+import { useRouter } from "next/navigation";
 
 export default function OldUserDashboard() {
+  const router = useRouter();
 
   const [activeTab, setActiveTab] = useState("library");
   const [files, setFiles] = useState<{ name: string }[]>([]);
@@ -107,8 +109,8 @@ export default function OldUserDashboard() {
                       <button
                         type="button"
                         onClick={() => {
-                          setSelectedFile(file.name);
-                          setIsMainOpen(true);
+                          // navigate to /listen route with title query
+                          router.push(`/listen?title=${encodeURIComponent(file.name)}`);
                         }}
                         className="px-4 py-1 text-white text-sm font-bold border-2 border-blue-700 rounded-[7px] bg-gradient-to-r from-[#197AF0] to-[#0252C5] shadow-[4px_4px_1px_0_#B1C2F4] cursor-pointer"
                       >
