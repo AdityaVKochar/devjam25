@@ -11,9 +11,7 @@ const Popup: React.FC<PopupProps> = ({ isOpen, onCancel, onSubmit }) => {
 
   if (!isOpen) return null;
 
-  // Smart submit handler
   const handleSmartSubmit = async () => {
-    // Check if link matches https://novelbin.com/b/{bookid}
     const match = link.match(/^https:\/\/novelbin\.com\/b\/[^/?#]+/);
     if (match) {
       try {
