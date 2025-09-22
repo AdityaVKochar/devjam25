@@ -11,6 +11,26 @@ const Popup: React.FC<PopupProps> = ({ isOpen, onCancel, onSubmit }) => {
 
   if (!isOpen) return null;
 
+  // Smart submit handler
+  const handleSmartSubmit = async () => {
+    // Check if link matches https://novelbin.com/b/{bookid}
+    const match = link.match(/^https:\/\/novelbin\.com\/b\/[^/?#]+/);
+    if (match) {
+      try {
+        await fetch("/api/extract", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ link }),
+        });
+        onSubmit(link);
+      } catch (err) {
+        alert("Failed to process the link. Please try again.");
+      }
+    } else {
+      onSubmit(link);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-80 backdrop-blur-lg transition-all">
       <div
@@ -113,7 +133,7 @@ const Popup: React.FC<PopupProps> = ({ isOpen, onCancel, onSubmit }) => {
             cancel
           </button>
           <button
-            onClick={() => onSubmit(link)}
+            onClick={handleSmartSubmit}
               style={{
                 borderRadius: "7px",
                 background: "var(--blue-grad, linear-gradient(90deg, #197AF0 0%, #0252C5 100%))",
