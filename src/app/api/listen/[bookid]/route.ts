@@ -3,9 +3,9 @@ import clientPromise from '@/lib/mongodb';
 
 const VOICE_URL = process.env.VOICE_URL;
 
-export async function POST(req: NextRequest, { params }: { params: { bookid: string } }) {
+export async function POST(req: NextRequest, { params }: { params: { bookid: string } | Promise<{ bookid: string }> }) {
   try {
-    const { bookid } = params;
+    const { bookid } = await (params as any);
     if (!bookid) {
       return NextResponse.json({ error: 'Missing bookid in URL' }, { status: 400 });
     }
@@ -61,12 +61,12 @@ export async function POST(req: NextRequest, { params }: { params: { bookid: str
   }
 }
 
-export async function GET(req: Request, { params }: { params: { bookid: string } }) {
+export async function GET(req: Request, { params }: { params: { bookid: string } | Promise<{ bookid: string }> }) {
   // Allow GET to call the same logic by proxying to POST handler
   try {
     // Build a fake NextRequest by calling POST internals — easiest is to call the POST handler
     // but since we can't easily construct NextRequest here, call the logic directly instead.
-    const bookid = await params.bookid;
+    const { bookid } = await (params as any);
     if (!bookid) {
       return NextResponse.json({ error: 'Missing bookid in URL' }, { status: 400 });
     }
