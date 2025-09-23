@@ -66,7 +66,7 @@ export async function GET(req: Request, { params }: { params: { bookid: string }
   try {
     // Build a fake NextRequest by calling POST internals — easiest is to call the POST handler
     // but since we can't easily construct NextRequest here, call the logic directly instead.
-    const bookid = params.bookid;
+    const bookid = await params.bookid;
     if (!bookid) {
       return NextResponse.json({ error: 'Missing bookid in URL' }, { status: 400 });
     }

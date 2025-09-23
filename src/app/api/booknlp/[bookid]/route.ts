@@ -5,7 +5,7 @@ const BOOKNLP_URL = process.env.BOOKNLP_URL;
 
 export async function POST(req: NextRequest, { params }: { params: { bookid: string } }) {
   try {
-    const { bookid } = params;
+    const { bookid } = await params;
     if (!bookid) {
       return NextResponse.json({ error: 'Missing bookid in URL' }, { status: 400 });
     }
@@ -13,44 +13,44 @@ export async function POST(req: NextRequest, { params }: { params: { bookid: str
       return NextResponse.json({ error: 'BOOKNLP_URL not set in environment' }, { status: 500 });
     }
 
+    console.log("1111")
+
+    // Require 'text' in request body
     const body = await req.json();
     const { text } = body || {};
     if (!text || typeof text !== 'string') {
       return NextResponse.json({ error: 'Missing or invalid text in request body' }, { status: 400 });
     }
 
-    let characters: any = [];
-    let chapters: any = [];
+    console.log("2222")
 
-    if (BOOKNLP_URL) {
-      const response = await fetch(BOOKNLP_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
-      });
-      if (!response.ok) {
-        return NextResponse.json({ error: 'Failed to fetch BookNLP data' }, { status: 500 });
-      }
-      const data = await response.json();
-      characters = data.characters;
-      chapters = data.chapters;
-
-      if (!characters || !chapters) {
-        return NextResponse.json({ error: 'Invalid BookNLP data format' }, { status: 400 });
-      }
-    } else {
-      characters = [];
-      const rawLines = (text || "").split(/\r?\n/);
-      const lines = rawLines.map((l) => ({ text: (l || "").trim() })).filter((l) => l.text);
-      chapters = [
-        {
-          title: 'Chapter 1',
-          lines,
-          bookid,
-        },
-      ];
+    // Call the BOOKNLP_URL with text
+    const response = await fetch(BOOKNLP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, bookid })
+    });
+    if (!response.ok) {
+      return NextResponse.json({ error: 'Failed to fetch BookNLP data' }, { status: 500 });
     }
 
+    console.log("3333")
+
+    const data = await response.json();
+    console.log(data);
+    const {parent_json} = data ;
+    console.log(parent_json);
+    const { characters, chapters } = parent_json;
+    //console.log(character)
+
+    console.log("4444")
+
+    if (!characters || !chapters) {
+      return NextResponse.json({ error: 'Invalid BookNLP data format' }, { status: 400 });
+    }
+
+    console.log("555")
+    // Store in MongoDB
     const client = await clientPromise;
     const db = client.db();
 
